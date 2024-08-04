@@ -6,13 +6,12 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-import sqlite3
 default_args = {
    'owner': 'airflow',
    'depends_on_past': False,
    'email_on_failure': True,
    'email_on_retry': False,
-   'email': ['your_email@example.com'],
+   'email': ['sdivyansh007@gmail.com'],
    'retries': 1,
    'retry_delay': timedelta(minutes=5),
 }
@@ -33,7 +32,6 @@ def clean_and_process(data):
    df.drop_duplicates(subset=['title'], inplace=True)
    return df
 def generate_sentiment_score(text):
-   # Mock sentiment API call
    return 0.5
 def store_to_db(data):
    conn = sqlite3.connect('/path/to/your/db.sqlite')
