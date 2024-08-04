@@ -1,0 +1,11 @@
+FROM apache/airflow:2.5.1
+USER root
+RUN apt-get update && apt-get install -y \
+   build-essential \
+   python3-dev \
+   libpq-dev
+USER airflow
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
+COPY pipeline_1.py /opt/airflow/dags/pipeline_1.py
+COPY pipeline_2.py /opt/airflow/dags/pipeline_2.py

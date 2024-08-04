@@ -1,0 +1,41 @@
+name: CI/CD Pipeline
+on:
+ push:
+   branches:
+     - main
+jobs:
+ build-and-deploy:
+   runs-on: ubuntu-latest
+   steps:
+   - name: Checkout code
+     uses: actions/checkout@v2
+   - name: Set up Docker Buildx
+     uses: docker/setup-buildx-action@v1
+   - name: Log in to Docker Hub
+     uses: docker/login-action@v1
+     with:
+       username: ${{ secrets.DOCKER_USERNAME }}
+       password: ${{ secrets.DOCKER_PASSWORD }}
+   - name: Build and push
+     uses: docker/build-push-action@v2
+     with:
+       context: .
+       push: true
+       tags: yourdockerhubusername/yourimage:latest
+   - name: Deploy to Airflow
+     env:
+       AIRFLOW_HOST: ${{ secrets.AIRFLOW_HOST }}
+       AIRFLOW_USERNAME: ${{ secrets.AIRFLOW_USERNAME }}
+       AIRFLOW_PASSWORD: ${{ secrets.AIRFLOW_PASSWORD }}
+     run: |
+       sshpass -p $AIRFLOW_PASSWORD ssh -o StrictHostKeyChecking=no $AIRFLOW_USERNAME@$AIRFLOW_HOST <<EOF
+         docker pull yourdockerhubusername/yourimage:latest
+         docker-compose down
+         docker-compose up -d
+       EOF
+   - name: Notify on success
+     if: success()
+     run: echo "Deployment succeeded!"
+   - name: Notify on failure
+     if: failure()
+     run: echo "Deployment failed!"
